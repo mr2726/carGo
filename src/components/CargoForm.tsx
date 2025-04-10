@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   TextField,
@@ -13,11 +13,20 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useStore } from '../store';
 import { Cargo, CargoStatus } from '../types';
-import { v4 as uuidv4 } from 'uuid';
 
-export const CargoForm: React.FC = () => {
+interface CargoFormProps {
+  initialData?: Cargo;
+  onSubmit?: (cargo: Omit<Cargo, 'id'>) => void;
+  mode?: 'create' | 'edit';
+}
+
+export const CargoForm: React.FC<CargoFormProps> = ({ 
+  initialData, 
+  onSubmit,
+  mode = 'create' 
+}) => {
   const navigate = useNavigate();
-  const { drivers, addCargo } = useStore();
+  const { drivers, addCargo, updateCargo } = useStore();
   const [formData, setFormData] = useState<Partial<Cargo>>({
     pickupLocation: '',
     deliveryLocation: '',
@@ -28,6 +37,12 @@ export const CargoForm: React.FC = () => {
     driverId: '',
     order: 0,
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const handleChange = (field: keyof Cargo) => (
     event: React.ChangeEvent<HTMLInputElement>
@@ -49,23 +64,30 @@ export const CargoForm: React.FC = () => {
     }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    const newCargo: Cargo = {
-      id: uuidv4(),
+    const cargoData: Omit<Cargo, 'id'> = {
       pickupLocation: formData.pickupLocation || '',
       deliveryLocation: formData.deliveryLocation || '',
       pickupDateTime: formData.pickupDateTime || new Date().toISOString(),
       deliveryDateTime: formData.deliveryDateTime || new Date().toISOString(),
       notes: formData.notes || '',
-      status: formData.status || 'booked',
+      status: (formData.status as CargoStatus) || 'booked',
       driverId: formData.driverId || '',
       order: formData.order || 0,
     };
 
-    addCargo(newCargo);
-    navigate('/cargos');
+    if (onSubmit) {
+      onSubmit(cargoData);
+    } else {
+      if (mode === 'edit' && initialData) {
+        await updateCargo(initialData.id, cargoData);
+      } else {
+        await addCargo(cargoData);
+      }
+      navigate('/cargos');
+    }
   };
 
   return (
@@ -166,7 +188,7 @@ export const CargoForm: React.FC = () => {
               variant="contained"
               color="primary"
             >
-              Create Cargo
+              {mode === 'edit' ? 'Update Cargo' : 'Create Cargo'}
             </Button>
           </Box>
         </Grid>

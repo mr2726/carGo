@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -26,8 +26,13 @@ export const CargoDetails: React.FC<CargoDetailsProps> = ({
   open,
   onClose,
 }) => {
-  const { drivers, updateCargo } = useStore();
+  const { drivers, updateCargo, cargos } = useStore();
   const [editedCargo, setEditedCargo] = useState<Cargo>(cargo);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setEditedCargo(cargo);
+  }, [cargo]);
 
   const handleChange = (field: keyof Cargo) => (
     event: React.ChangeEvent<HTMLInputElement>
@@ -49,9 +54,20 @@ export const CargoDetails: React.FC<CargoDetailsProps> = ({
     }
   };
 
-  const handleSave = () => {
-    updateCargo(editedCargo);
-    onClose();
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      // Отделяем id от остальных данных и отправляем в Firebase
+      const { id, ...cargoData } = editedCargo;
+      console.log('Saving cargo with id:', id);
+      console.log('Cargo data:', cargoData);
+      await updateCargo(id, cargoData);
+      onClose();
+    } catch (error) {
+      console.error('Error updating cargo:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -140,9 +156,14 @@ export const CargoDetails: React.FC<CargoDetailsProps> = ({
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained" color="primary">
-          Save Changes
+        <Button onClick={onClose} disabled={isLoading}>Cancel</Button>
+        <Button 
+          onClick={handleSave} 
+          variant="contained" 
+          color="primary"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Saving...' : 'Save Changes'}
         </Button>
       </DialogActions>
     </Dialog>

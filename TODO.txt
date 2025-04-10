@@ -1,0 +1,5 @@
+Fix bug with Last Location
+Connect firebase to keep all freights 
+Add push notification if new someone book new Load need to get notification about it Exemple (NEW* [Driver name] [Pickup date/time] [delivery location])
+
+starting to create the car_go app 
