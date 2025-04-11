@@ -1,21 +1,25 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  AppBar,
-  Toolbar,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
   Typography,
-  Button,
   Box,
   alpha,
   useTheme,
   Tooltip,
-  Container,
+  Button,
   Badge,
 } from '@mui/material';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import AddIcon from '@mui/icons-material/Add';
 import { useStore } from '../store';
+
+const DRAWER_WIDTH = 240;
 
 export const Navigation: React.FC = () => {
   const navigate = useNavigate();
@@ -34,150 +38,157 @@ export const Navigation: React.FC = () => {
   ).length;
 
   return (
-    <AppBar 
-      position="static" 
-      elevation={0}
-      sx={{ 
-        background: 'transparent',
-        backdropFilter: 'blur(10px)',
-        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: DRAWER_WIDTH,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: DRAWER_WIDTH,
+          boxSizing: 'border-box',
+          background: theme.palette.background.paper,
+          borderRight: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+        },
       }}
     >
-      <Container maxWidth="lg">
-        <Toolbar 
-          disableGutters
-          sx={{ 
+      <Box
+        sx={{
+          p: 3,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+        }}
+      >
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: '14px',
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
-            minHeight: 80,
+            justifyContent: 'center',
+            boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.25)}`,
+            animation: 'pulse 2s infinite',
+            '@keyframes pulse': {
+              '0%': {
+                boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.25)}`,
+              },
+              '50%': {
+                boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.4)}`,
+              },
+              '100%': {
+                boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.25)}`,
+              },
+            },
           }}
         >
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 2,
-              cursor: 'pointer',
-            }}
-            onClick={() => navigate('/')}
-          >
-            <Box
-              sx={{
-                width: 40,
-                height: 40,
-                borderRadius: '12px',
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.2)}`,
-              }}
-            >
-              <DirectionsCarIcon sx={{ color: 'white', fontSize: 24 }} />
-            </Box>
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 700,
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                letterSpacing: '0.5px',
-              }}
-            >
-              CarGo
-            </Typography>
-          </Box>
+          <DirectionsCarIcon sx={{ color: 'white', fontSize: 26 }} />
+        </Box>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 800,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '0.5px',
+          }}
+        >
+          CarGo
+        </Typography>
+      </Box>
 
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              gap: 2,
-              '& .MuiButton-root': {
-                textTransform: 'none',
-                fontWeight: 500,
-                fontSize: '1rem',
-                px: 3,
-                py: 1,
-                borderRadius: '12px',
-                transition: 'all 0.3s ease',
-                position: 'relative',
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  bottom: 0,
-                  left: '50%',
-                  width: isActive('/') ? '100%' : '0%',
-                  height: '2px',
-                  background: theme.palette.primary.main,
-                  transition: 'all 0.3s ease',
-                  transform: 'translateX(-50%)',
+      <List sx={{ px: 2 }}>
+        <ListItem
+          button
+          onClick={() => navigate('/')}
+          sx={{
+            borderRadius: '12px',
+            mb: 1,
+            background: isActive('/') ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+            color: isActive('/') ? theme.palette.primary.main : theme.palette.text.primary,
+            '&:hover': {
+              background: alpha(theme.palette.primary.main, 0.05),
+              color: theme.palette.primary.main,
+            },
+          }}
+        >
+          <ListItemIcon>
+            <DirectionsCarIcon
+              sx={{
+                color: isActive('/') ? theme.palette.primary.main : theme.palette.text.primary,
+              }}
+            />
+          </ListItemIcon>
+          <ListItemText primary="Drivers" />
+        </ListItem>
+
+        <ListItem
+          button
+          onClick={() => navigate('/cargos')}
+          sx={{
+            borderRadius: '12px',
+            mb: 1,
+            background: isActive('/cargos') ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+            color: isActive('/cargos') ? theme.palette.primary.main : theme.palette.text.primary,
+            '&:hover': {
+              background: alpha(theme.palette.primary.main, 0.05),
+              color: theme.palette.primary.main,
+            },
+          }}
+        >
+          <ListItemIcon>
+            <Badge
+              badgeContent={activeCargosCount + bookedCargosCount}
+              color="primary"
+              sx={{
+                '& .MuiBadge-badge': {
+                  animation: activeCargosCount + bookedCargosCount > 0 ? 'bounce 1s infinite' : 'none',
+                  '@keyframes bounce': {
+                    '0%, 100%': {
+                      transform: 'scale(1) translate(50%, -50%)',
+                    },
+                    '50%': {
+                      transform: 'scale(1.1) translate(50%, -50%)',
+                    },
+                  },
                 },
-                '&:hover::after': {
-                  width: '100%',
-                },
+              }}
+            >
+              <LocalShippingIcon
+                sx={{
+                  color: isActive('/cargos') ? theme.palette.primary.main : theme.palette.text.primary,
+                }}
+              />
+            </Badge>
+          </ListItemIcon>
+          <ListItemText primary="All Cargoes" />
+        </ListItem>
+
+        <Box sx={{ px: 2, mt: 4 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/create-cargo')}
+            fullWidth
+            sx={{
+              py: 1.2,
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+              boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.25)}`,
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: `0 12px 28px ${alpha(theme.palette.primary.main, 0.35)}`,
+              },
+              '&:active': {
+                transform: 'translateY(0)',
               },
             }}
           >
-            <Tooltip title="View Drivers">
-              <Button
-                color="inherit"
-                startIcon={<DirectionsCarIcon />}
-                onClick={() => navigate('/')}
-                sx={{
-                  color: isActive('/') 
-                    ? theme.palette.primary.main 
-                    : theme.palette.text.primary,
-                  '&:hover': {
-                    color: theme.palette.primary.main,
-                    background: alpha(theme.palette.primary.main, 0.05),
-                  },
-                }}
-              >
-                Drivers
-              </Button>
-            </Tooltip>
-
-            <Tooltip title="View All Cargoes">
-              <Button
-                color="inherit"
-                startIcon={<LocalShippingIcon />}
-                onClick={() => navigate('/cargos')}
-                sx={{
-                  color: isActive('/cargos') 
-                    ? theme.palette.primary.main 
-                    : theme.palette.text.primary,
-                  '&:hover': {
-                    color: theme.palette.primary.main,
-                    background: alpha(theme.palette.primary.main, 0.05),
-                  },
-                }}
-              >
-                All Cargoes
-              </Button>
-            </Tooltip>
-
-            <Tooltip title="Create New Cargo">
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => navigate('/create-cargo')}
-                sx={{
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                  boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.2)}`,
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: `0 6px 24px ${alpha(theme.palette.primary.main, 0.3)}`,
-                  },
-                }}
-              >
-                Create Cargo
-              </Button>
-            </Tooltip>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+            Create Cargo
+          </Button>
+        </Box>
+      </List>
+    </Drawer>
   );
 }; 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Box, Typography, Paper, Chip, Stack, alpha } from '@mui/material';
+import { Box, Typography, Paper, Chip, Stack, alpha, useTheme, ChipProps } from '@mui/material';
 import { Cargo } from '../types';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -11,22 +11,48 @@ interface SortableCargoItemProps {
   cargo: Cargo;
 }
 
-const getStatusColor = (status: string) => {
+const getStatusConfig = (status: string, theme: any) => {
   switch (status.toLowerCase()) {
     case 'dispatched':
-      return 'info';
+      return {
+        color: 'info' as ChipProps['color'],
+        background: alpha(theme.palette.info.main, 0.1),
+        border: alpha(theme.palette.info.main, 0.2),
+        text: theme.palette.info.light
+      };
     case 'pickedup':
-      return 'warning';
+      return {
+        color: 'warning' as ChipProps['color'],
+        background: alpha(theme.palette.warning.main, 0.1),
+        border: alpha(theme.palette.warning.main, 0.2),
+        text: theme.palette.warning.light
+      };
     case 'delivered':
-      return 'success';
+      return {
+        color: 'success' as ChipProps['color'],
+        background: alpha(theme.palette.success.main, 0.1),
+        border: alpha(theme.palette.success.main, 0.2),
+        text: theme.palette.success.light
+      };
     case 'booked':
-      return 'primary';
+      return {
+        color: 'primary' as ChipProps['color'],
+        background: alpha(theme.palette.primary.main, 0.1),
+        border: alpha(theme.palette.primary.main, 0.2),
+        text: theme.palette.primary.light
+      };
     default:
-      return 'default';
+      return {
+        color: 'default' as ChipProps['color'],
+        background: alpha(theme.palette.grey[500], 0.1),
+        border: alpha(theme.palette.grey[500], 0.2),
+        text: theme.palette.text.secondary
+      };
   }
 };
 
 export const SortableCargoItem: React.FC<SortableCargoItemProps> = ({ cargo }) => {
+  const theme = useTheme();
   const {
     attributes,
     listeners,
@@ -35,6 +61,8 @@ export const SortableCargoItem: React.FC<SortableCargoItemProps> = ({ cargo }) =
     transition,
     isDragging,
   } = useSortable({ id: cargo.id });
+
+  const statusConfig = getStatusConfig(cargo.status, theme);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -53,17 +81,18 @@ export const SortableCargoItem: React.FC<SortableCargoItemProps> = ({ cargo }) =
       sx={{
         p: 2,
         mb: 1.5,
-        background: (theme) => 
-          isDragging 
-            ? alpha(theme.palette.primary.main, 0.05)
-            : 'linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%)',
+        background: isDragging 
+          ? alpha(theme.palette.primary.main, 0.1)
+          : `linear-gradient(145deg, ${alpha(theme.palette.background.paper, 0.6)} 0%, ${alpha(theme.palette.background.paper, 0.8)} 100%)`,
         borderRadius: 2,
         transition: 'all 0.3s cubic-bezier(0.2, 0, 0, 1)',
-        border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+        backdropFilter: 'blur(10px)',
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: (theme) => `0 4px 12px ${alpha(theme.palette.common.black, 0.08)}`,
-          borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
+          boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.2)}`,
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+          background: `linear-gradient(145deg, ${alpha(theme.palette.background.paper, 0.7)} 0%, ${alpha(theme.palette.background.paper, 0.9)} 100%)`,
         },
         '&:active': {
           cursor: 'grabbing',
@@ -73,7 +102,7 @@ export const SortableCargoItem: React.FC<SortableCargoItemProps> = ({ cargo }) =
       <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
         <DragIndicatorIcon 
           sx={{ 
-            color: 'text.secondary',
+            color: alpha(theme.palette.text.secondary, 0.6),
             mr: 1,
             mt: 0.5,
             cursor: 'grab',
@@ -84,6 +113,7 @@ export const SortableCargoItem: React.FC<SortableCargoItemProps> = ({ cargo }) =
             transition: 'opacity 0.2s',
             '&:hover': {
               opacity: 1,
+              color: theme.palette.text.primary,
             }
           }} 
         />
@@ -92,18 +122,23 @@ export const SortableCargoItem: React.FC<SortableCargoItemProps> = ({ cargo }) =
             <Chip
               label={cargo.status}
               size="small"
-              color={getStatusColor(cargo.status)}
+              color={statusConfig.color}
               sx={{ 
                 textTransform: 'capitalize',
                 fontWeight: 500,
+                background: statusConfig.background,
+                border: `1px solid ${statusConfig.border}`,
+                '& .MuiChip-label': {
+                  color: statusConfig.text,
+                },
               }}
             />
             <Typography 
               variant="caption" 
-              color="text.secondary"
               sx={{ 
                 fontWeight: 500,
                 letterSpacing: '0.5px',
+                color: alpha(theme.palette.text.secondary, 0.8),
               }}
             >
               Order #{cargo.order}
@@ -112,22 +147,42 @@ export const SortableCargoItem: React.FC<SortableCargoItemProps> = ({ cargo }) =
 
           <Stack spacing={1.5}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <LocationOnIcon sx={{ color: 'success.main', mr: 1, fontSize: 20 }} />
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                From: <strong>{cargo.pickupLocation}</strong>
+              <LocationOnIcon sx={{ color: theme.palette.success.main, mr: 1, fontSize: 20 }} />
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  fontWeight: 500,
+                  color: theme.palette.text.primary,
+                }}
+              >
+                From: <Box component="span" sx={{ color: theme.palette.success.light }}>{cargo.pickupLocation}</Box>
               </Typography>
             </Box>
             
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <LocationOnIcon sx={{ color: 'error.main', mr: 1, fontSize: 20 }} />
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                To: <strong>{cargo.deliveryLocation}</strong>
+              <LocationOnIcon sx={{ color: theme.palette.error.main, mr: 1, fontSize: 20 }} />
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  fontWeight: 500,
+                  color: theme.palette.text.primary,
+                }}
+              >
+                To: <Box component="span" sx={{ color: theme.palette.error.light }}>{cargo.deliveryLocation}</Box>
               </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <AccessTimeIcon sx={{ color: 'text.secondary', mr: 1, fontSize: 20 }} />
-              <Typography variant="body2" color="text.secondary">
+              <AccessTimeIcon sx={{ color: alpha(theme.palette.text.secondary, 0.8), mr: 1, fontSize: 20 }} />
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: alpha(theme.palette.text.secondary, 0.8),
+                  '&:hover': {
+                    color: theme.palette.text.primary,
+                  },
+                }}
+              >
                 {new Date(cargo.pickupDateTime).toLocaleString()} → {new Date(cargo.deliveryDateTime).toLocaleString()}
               </Typography>
             </Box>
@@ -136,16 +191,20 @@ export const SortableCargoItem: React.FC<SortableCargoItemProps> = ({ cargo }) =
           {cargo.notes && (
             <Typography 
               variant="body2" 
-              color="text.secondary" 
               sx={{ 
                 mt: 1.5,
                 fontStyle: 'italic',
                 borderLeft: '3px solid',
-                borderColor: 'primary.main',
+                borderColor: theme.palette.primary.main,
                 pl: 1.5,
                 py: 0.5,
-                background: (theme) => alpha(theme.palette.primary.main, 0.03),
+                color: alpha(theme.palette.text.secondary, 0.9),
+                background: alpha(theme.palette.primary.main, 0.1),
                 borderRadius: '0 4px 4px 0',
+                '&:hover': {
+                  color: theme.palette.text.primary,
+                  background: alpha(theme.palette.primary.main, 0.15),
+                },
               }}
             >
               {cargo.notes}

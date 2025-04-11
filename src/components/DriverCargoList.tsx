@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper, alpha, Tabs, Tab, Chip } from '@mui/material';
+import { Box, Typography, Paper, alpha, Tabs, Tab, Chip, useTheme } from '@mui/material';
 import {
   DndContext,
   closestCenter,
@@ -31,25 +31,35 @@ interface TabPanelProps {
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
+  const theme = useTheme();
 
   return (
-    <div
+    <Box
       role="tabpanel"
       hidden={value !== index}
       id={`cargo-tabpanel-${index}`}
       aria-labelledby={`cargo-tab-${index}`}
+      sx={{
+        background: 'transparent',
+      }}
       {...other}
     >
       {value === index && (
-        <Box sx={{ py: 2 }}>
+        <Box 
+          sx={{ 
+            py: 2,
+            background: 'transparent',
+          }}
+        >
           {children}
         </Box>
       )}
-    </div>
+    </Box>
   );
 }
 
 export const DriverCargoList: React.FC<DriverCargoListProps> = ({ driverId }) => {
+  const theme = useTheme();
   const { getDriverCargos, updateCargoOrder } = useStore();
   const [tabValue, setTabValue] = useState(0);
   
@@ -104,13 +114,23 @@ export const DriverCargoList: React.FC<DriverCargoListProps> = ({ driverId }) =>
     <Paper
       sx={{
         p: 3,
-        background: (theme) => alpha(theme.palette.background.paper, 0.8),
+        background: `linear-gradient(145deg, ${alpha(theme.palette.background.paper, 0.6)} 0%, ${alpha(theme.palette.background.paper, 0.8)} 100%)`,
         backdropFilter: 'blur(10px)',
         borderRadius: 2,
-        boxShadow: (theme) => `0 4px 20px ${alpha(theme.palette.common.black, 0.05)}`,
+        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+        boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.2)}`,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+      <Box 
+        sx={{ 
+          borderBottom: 1, 
+          borderColor: alpha(theme.palette.divider, 0.1), 
+          mb: 2,
+        }}
+      >
         <Tabs 
           value={tabValue} 
           onChange={handleTabChange}
@@ -119,7 +139,16 @@ export const DriverCargoList: React.FC<DriverCargoListProps> = ({ driverId }) =>
               textTransform: 'none',
               fontWeight: 500,
               minWidth: 120,
-            }
+              color: alpha(theme.palette.text.primary, 0.7),
+              '&.Mui-selected': {
+                color: theme.palette.primary.main,
+              },
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: theme.palette.primary.main,
+              height: 3,
+              borderRadius: '3px 3px 0 0',
+            },
           }}
         >
           <Tab 
@@ -131,7 +160,15 @@ export const DriverCargoList: React.FC<DriverCargoListProps> = ({ driverId }) =>
                     label={activeCargos.length} 
                     size="small" 
                     color="primary"
-                    sx={{ height: 20, fontSize: '0.75rem' }}
+                    sx={{ 
+                      height: 20, 
+                      fontSize: '0.75rem',
+                      background: alpha(theme.palette.primary.main, 0.1),
+                      border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                      '& .MuiChip-label': {
+                        color: theme.palette.primary.light,
+                      },
+                    }}
                   />
                 )}
               </Box>
@@ -146,7 +183,15 @@ export const DriverCargoList: React.FC<DriverCargoListProps> = ({ driverId }) =>
                     label={bookedCargos.length} 
                     size="small" 
                     color="info"
-                    sx={{ height: 20, fontSize: '0.75rem' }}
+                    sx={{ 
+                      height: 20, 
+                      fontSize: '0.75rem',
+                      background: alpha(theme.palette.info.main, 0.1),
+                      border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                      '& .MuiChip-label': {
+                        color: theme.palette.info.light,
+                      },
+                    }}
                   />
                 )}
               </Box>
@@ -161,7 +206,15 @@ export const DriverCargoList: React.FC<DriverCargoListProps> = ({ driverId }) =>
                     label={historyCargos.length} 
                     size="small" 
                     color="default"
-                    sx={{ height: 20, fontSize: '0.75rem' }}
+                    sx={{ 
+                      height: 20, 
+                      fontSize: '0.75rem',
+                      background: alpha(theme.palette.text.primary, 0.1),
+                      border: `1px solid ${alpha(theme.palette.text.primary, 0.1)}`,
+                      '& .MuiChip-label': {
+                        color: alpha(theme.palette.text.primary, 0.7),
+                      },
+                    }}
                   />
                 )}
               </Box>
@@ -177,15 +230,21 @@ export const DriverCargoList: React.FC<DriverCargoListProps> = ({ driverId }) =>
           onDragEnd={handleDragEnd}
         >
           <SortableContext items={activeCargos} strategy={verticalListSortingStrategy}>
-            <Box sx={{ minHeight: 100 }}>
+            <Box 
+              sx={{ 
+                minHeight: 100,
+                flex: 1,
+                background: 'transparent',
+              }}
+            >
               {activeCargos.length === 0 ? (
                 <Typography
                   variant="body2"
-                  color="text.secondary"
                   sx={{
                     textAlign: 'center',
                     py: 4,
                     fontStyle: 'italic',
+                    color: alpha(theme.palette.text.secondary, 0.8),
                   }}
                 >
                   No active cargos
@@ -201,15 +260,21 @@ export const DriverCargoList: React.FC<DriverCargoListProps> = ({ driverId }) =>
       </TabPanel>
 
       <TabPanel value={tabValue} index={1}>
-        <Box sx={{ minHeight: 100 }}>
+        <Box 
+          sx={{ 
+            minHeight: 100,
+            flex: 1,
+            background: 'transparent',
+          }}
+        >
           {bookedCargos.length === 0 ? (
             <Typography
               variant="body2"
-              color="text.secondary"
               sx={{
                 textAlign: 'center',
                 py: 4,
                 fontStyle: 'italic',
+                color: alpha(theme.palette.text.secondary, 0.8),
               }}
             >
               No booked cargos
@@ -223,15 +288,21 @@ export const DriverCargoList: React.FC<DriverCargoListProps> = ({ driverId }) =>
       </TabPanel>
 
       <TabPanel value={tabValue} index={2}>
-        <Box sx={{ minHeight: 100 }}>
+        <Box 
+          sx={{ 
+            minHeight: 100,
+            flex: 1,
+            background: 'transparent',
+          }}
+        >
           {historyCargos.length === 0 ? (
             <Typography
               variant="body2"
-              color="text.secondary"
               sx={{
                 textAlign: 'center',
                 py: 4,
                 fontStyle: 'italic',
+                color: alpha(theme.palette.text.secondary, 0.8),
               }}
             >
               No history cargos
